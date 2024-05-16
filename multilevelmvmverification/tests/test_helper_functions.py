@@ -1,0 +1,158 @@
+import os
+import sys
+import inspect
+import numpy as np
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+
+from methods import get_point_from_single_index, get_next_nondescending_point
+
+
+def get_grid_points(n_numbers: int, max_value: int):
+    """
+    Generate and return a list of grid points where each point holds values
+    n_numbers number of numbers.
+
+    Every number gets values from `0` to `max_value`. Therefore, the total
+    number of grid points is `(max_value + 1)^n_numbers.
+    """
+    grid_points = []
+    current_coords = np.zeros(n_numbers, dtype=np.uint8)
+    while True:
+        grid_points.append(current_coords.copy())
+
+        # Increment the coordinates
+        idx = n_numbers - 1
+        while idx >= 0:
+            if current_coords[idx] <= max_value - 1:
+                current_coords[idx] += 1
+                break
+            else:
+                current_coords[idx] = 0
+                idx -= 1
+
+        if idx == -1:
+            break
+
+    return grid_points
+
+
+def get_nondescending_grid_points(n_numbers: int, max_value: int):
+    """
+    Generate and return a list of grid points where each point holds values
+    n_numbers number of numbers in nondescending order.
+
+    Every number gets values from `0` to `max_value`. Therefore, the total
+    number of grid points is `(max_value + 1)^n_numbers.
+    """
+    grid_points = get_grid_points(n_numbers, max_value)
+    ascending_lists = list()
+    for grid_point in grid_points:
+        if np.array_equal(sorted(grid_point), grid_point):
+            ascending_lists.append(grid_point)
+    return ascending_lists
+
+
+def get_grid_points_with_index(n_numbers: int, max_value: int):
+    """
+    Generate a list of grid points where each point holds values n_numbers
+    number of numbers.
+
+    Uses the function `get_point_from_single_index`.
+
+    Returns an array of grid point arrays.
+    """
+    grid_points = []
+    for i in range((max_value + 1)**n_numbers):
+        grid_points.append(get_point_from_single_index(i, n_numbers, max_value + 1))
+
+    return grid_points
+
+
+def get_next_point(current_coords, idx: int, max_value: int):
+    """
+    Assuming a list of grid points where each point holds values n_numbers
+    number of numbers, this function returns the next point in the list.
+
+    Every number gets values from `0` to `max_value`. Therefore, the total
+    number of grid points is `(max_value + 1)^n_numbers.
+
+    Returns the next point and the index for bookkeeping.
+    """
+
+    # Increment the coordinates
+    while idx >= 0:
+        if current_coords[idx] <= max_value - 1:
+            current_coords[idx] += 1
+            break
+        else:
+            current_coords[idx] = 0
+            idx -= 1
+
+    return current_coords, idx
+
+
+def get_grid_points_with_get_point_function(n_numbers: int, max_value: int, get_next_point_from_point: callable):
+    """
+    Generate a list of grid points where each point holds values n_numbers
+    number of numbers.
+
+    To create the list of the grid points, the function `get_next_point_from_point`
+    is used, which is a function that takes a point of the grid and returns the
+    next point.
+
+    Returns an array of grid point arrays.
+    """
+    grid_points = []
+    current_coords = np.zeros(n_numbers, dtype=int)
+    while True:
+        grid_points.append(current_coords.copy())
+        idx = n_numbers - 1
+        current_coords, idx = get_next_point_from_point(current_coords, idx, max_value)
+        if idx == -1:
+            break
+    return grid_points
+
+
+def compare_get_grid_functions(get_grid_1: callable, get_grid_2: callable):
+    """
+    Test function to check if two function that return a point grid, return the
+    same grid.
+
+    Different pairs of `n_numbers` and `max_value` values are applied in a for
+    loop for comprehensive testing.
+    """
+    for n_numbers, max_value in [(2, 4), (5, 9)]:
+        grid_points_1 = get_grid_1(n_numbers, max_value)
+        grid_points_2 = get_grid_2(n_numbers, max_value)
+        assert len(grid_points_1) == len(grid_points_2), (
+            f"Lengths of the two lists are different. "
+            f"Expected: {len(grid_points_1)}, "
+            f"Found: {len(grid_points_2)}"
+        )
+        for i in range(len(grid_points_1)):
+            assert np.array_equal(grid_points_1[i], grid_points_2[i]), (
+                f"Grid points at index {i} are different. "
+                f"Expected: {grid_points_1[i]}, "
+                f"Found: {grid_points_2[i]}"
+            )
+
+
+if __name__ == "__main__":
+    # We check whether the functions get_point_from_single_index and
+    # get_next_nondescending_point are working correctly. To do this, we
+    # generate a list of grid points with the function 'get_grid_points' and
+    # compare it with the list generated by the functions
+    # get_point_from_single_index and get_next_nondescending_point.
+    def get_grid_points_with_get_point(n_numbers: int, max_value: int):
+        return get_grid_points_with_get_point_function(n_numbers, max_value, get_next_point)
+
+    def get_grid_points_with_get_nondescending_point(n_numbers: int, max_value: int):
+        return get_grid_points_with_get_point_function(n_numbers, max_value, get_next_nondescending_point)
+
+    compare_get_grid_functions(get_grid_points, get_grid_points_with_index)
+    compare_get_grid_functions(get_grid_points, get_grid_points_with_get_point)
+    compare_get_grid_functions(get_nondescending_grid_points, get_grid_points_with_get_nondescending_point)
+    print("All tests passed.")

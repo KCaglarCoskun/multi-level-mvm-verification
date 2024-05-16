@@ -1,0 +1,36 @@
+arch_params:
+  N: 32
+  n_cols: 1
+
+chip_params:
+  # If a list of physical_noms is provided, it will be used. This represents the nominal
+  # voltage (in volts) for each logical input value.
+  # V_DS is given as 1V. V_GS is given as -3V, but that affects the resistances and the measurements.
+  physical_noms: [0, 1]
+
+  # If physical_noms is not provided, all of the following values must be provided so
+  # that the software can produce the V_nom list: logical_max, physical_0_nom, physical_max_nom, distribution
+  # logical_max: 1 # Maximum logical input value for the voltage based input
+  # Nominal voltage value for the logical input value of 0. If skipped, it is
+  # chosen such that 'chip params -> physical_0_nom' / 'chip params -> physical_max_nom' =
+  # 'memristor params -> physical_max_nom' / 'memristor params -> physical_0_nom'
+  # physical_0_nom: 0 # Nominal voltage value for the logical input value of 0
+  # physical_max_nom: 5 # Nominal voltage value for the logical input value of logical_max
+  # distribution: 'linear' # 'linear' or 'log' (logarithmic)
+  relative_error: 0 # Relative plus-minus error for the voltage values
+
+memristor_params:
+  # If a list of physical_noms is provided, it will be used. This represents the nominal
+  # resistance (in ohms) for each logical input value.
+  # physical_noms are the mean resistances for the pulse voltages of 10, -4, -6, -8, -10.
+  # physical_noms: [18309185, 4346693, 961401, 435310, 200421]
+  # However, as seen in Figure 3a, they use -4, -6, -8, and -10.
+  physical_noms: [4346693, 961401, 435310, 200421]
+  
+  # If physical_noms is not provided, all of the following values must be provided so
+  # that the software can produce the physical_noms list: logical_max, physical_0_nom, physical_max_nom, distribution
+  # logical_max: 3 # Maximum logical input value for the memristor based input
+  # physical_0_nom: 1.0e+99 # 18.5e+6 # Nominal resistance value for the logical input value of 0
+  # physical_max_nom: 3.1e+3 # Nominal resistance value for the logical input value of logical_max
+  # distribution: 'linear' # 'linear' or 'log' (logarithmic)
+  relative_error: 0.3 # Relative plus-minus error for the resistance values
