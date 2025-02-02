@@ -6,8 +6,7 @@ This project implements methods in [1] to verify the correctness of analog MAC u
 
 ## Requirements
 
-- Numpy
-- PyYAML
+See the `requirements.txt` file for the required packages.
 
 ## Installation
 
@@ -20,7 +19,7 @@ pip install .
 ```
 Or alternatively install in a virtual environment.
 
-The package was tested with Python 3.12, numpy 2.2.2, and PyYAML 6.0.2. The example in the folder case_study_MJW_2023 matplotlib and was tested with version 3.10.0.
+The package was tested with Python 3.12, numpy 2.2.2, and PyYAML 6.0.2. The example in the folder case_study_MJW_2023 requires matplotlib and was tested with version 3.10.0.
 
 ## Usage
 
